@@ -55,27 +55,27 @@ class DashboardController extends Controller
             ->groupBy('date')
             ->get();
         }elseif(auth()->user()->roles=='type1'){ 
-            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$location)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
-            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$location)->select(DB::raw('DATE(created_at) as date'))
+            $cpliant = Topic::where('type','=','cpliant')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dmm','=',$location)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dmm','=',$location)->select(DB::raw('DATE(created_at) as date'))
             ->groupBy('date')
             ->get();
          
         
         }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
-            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$location)->where('status','=','Active')->orderby('id','desc')->count(); 
-            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
-            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$location)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
-            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$location)->select(DB::raw('DATE(created_at) as date'))
+            $cpliant = Topic::where('type','=','cpliant')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('dmm','=',$location)->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dmm','=',$location)->orderby('id','desc')->count(); 
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dmm','=',$location)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dmm','=',$location)->select(DB::raw('DATE(created_at) as date'))
             ->groupBy('date')
             ->get();
         }
-        // $Topic = Topic::where('type','=',' broken')->where('dee','=',auth()->user()->location)->where('status','like','%'.auth()->user()->id)->where(function($query) {
+        // $Topic = Topic::where('type','=',' broken')->where('dmm','=',auth()->user()->location)->where('status','like','%'.auth()->user()->id)->where(function($query) {
         //     $query->where('status','like','Assign%')
         //     ->orWhere('status','like','Reques%');
         //     })->orderby('id','desc')->get();
@@ -132,10 +132,10 @@ class DashboardController extends Controller
                 ->groupBy('title')
                 ->get(); 
             }else{
-                $Topics = Topic::where('type','Vrendor')->where('status','Active')->where('dee',$district)->select("capacity", DB::raw("count(*) as total"))
+                $Topics = Topic::where('type','Vrendor')->where('status','Active')->where('dmm',$district)->select("capacity", DB::raw("count(*) as total"))
                 ->groupBy('capacity')
                 ->get();
-                $Topics2 = Topic::where('type',' broken')->where('status','Active')->where('dee',$district)->select("title", DB::raw("count(*) as total"))
+                $Topics2 = Topic::where('type',' broken')->where('status','Active')->where('dmm',$district)->select("title", DB::raw("count(*) as total"))
                 ->groupBy('title')
                 ->get(); 
 
@@ -210,10 +210,10 @@ class DashboardController extends Controller
 
             $Topics=[];
             $Topics2=[];
-            $Topics = Topic::where('type','Vrendor')->where('status','like','Active%')->where('dee','LIKE',"%".$district."%")->select("capacity", DB::raw("count(*) as total"))
+            $Topics = Topic::where('type','Vrendor')->where('status','like','Active%')->where('dmm','LIKE',"%".$district."%")->select("capacity", DB::raw("count(*) as total"))
             ->groupBy('capacity')
             ->get();
-            $Topics2 = Topic::where('type',' broken')->where('status','like','Active%')->where('dee','=',$district)->select("title", DB::raw("count(*) as total"))
+            $Topics2 = Topic::where('type',' broken')->where('status','like','Active%')->where('dmm','=',$district)->select("title", DB::raw("count(*) as total"))
             ->groupBy('title')
             ->get(); 
 
@@ -252,7 +252,7 @@ class DashboardController extends Controller
             $Active='Active:'.auth()->user()->id;
             $Topics=[];
             $Topics2=[];
-            $Topics = Topic::where('type','Vrendor')->where('status','=',$Active)->where('dee',$district)->select("capacity", DB::raw("count(*) as total"))
+            $Topics = Topic::where('type','Vrendor')->where('status','=',$Active)->where('dmm',$district)->select("capacity", DB::raw("count(*) as total"))
             ->groupBy('capacity')
             ->get();
             $Topics2 = Topic::where('type',' broken')->where('status','=',$Active)->select("title", DB::raw("count(*) as total"))
@@ -363,10 +363,10 @@ class DashboardController extends Controller
                 ->groupBy('title')
                 ->get(); 
             }else{
-                $Topics = Topic::where('type','cpliant')->where('dee',$district)->select("title", DB::raw("count(*) as total"))
+                $Topics = Topic::where('type','cpliant')->where('dmm',$district)->select("title", DB::raw("count(*) as total"))
                 ->groupBy('title')
                 ->get();
-                $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where(function($query) {$query->where('status', 'like', 'Reject%')->orWhere('status', 'like', 'Rectif%');}
+                $Topics2 = Topic::where('type','cpliant')->where('dmm',$district)->where(function($query) {$query->where('status', 'like', 'Reject%')->orWhere('status', 'like', 'Rectif%');}
                 )->select("title", DB::raw("count(*) as total"))
                 ->groupBy('title')
                 ->get(); 
@@ -381,27 +381,27 @@ class DashboardController extends Controller
                 ->groupBy('title')
                 ->get(); 
             }else{
-                $Topics = Topic::where('type','cpliant')->where('dee',$district)->select("title", DB::raw("count(*) as total"))
+                $Topics = Topic::where('type','cpliant')->where('dmm',$district)->select("title", DB::raw("count(*) as total"))
                 ->groupBy('title')
                 ->get();
-                $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where('status','Rectified')->select("title", DB::raw("count(*) as total"))
+                $Topics2 = Topic::where('type','cpliant')->where('dmm',$district)->where('status','Rectified')->select("title", DB::raw("count(*) as total"))
                 ->groupBy('title')
                 ->get(); 
             }
           
         }elseif(auth()->user()->roles=='type1'){
-            $Topics = Topic::where('type','cpliant')->where('dee',$district)->where('title','=',auth()->user()->location)->select("title", DB::raw("count(*) as total"))
+            $Topics = Topic::where('type','cpliant')->where('dmm',$district)->where('title','=',auth()->user()->location)->select("title", DB::raw("count(*) as total"))
             ->groupBy('title')
             ->get();
-            $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where('title','=',auth()->user()->location)->where('status','like','Rectif:%')->select("title", DB::raw("count(*) as total"))
+            $Topics2 = Topic::where('type','cpliant')->where('dmm',$district)->where('title','=',auth()->user()->location)->where('status','like','Rectif:%')->select("title", DB::raw("count(*) as total"))
             ->groupBy('title')
             ->get();
         }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
             $rectifed='Rectif:'.auth()->user()->id; 
-            $Topics = Topic::where('type','cpliant')->where('dee',$district)->where('status','like',$rectifed)->select("title", DB::raw("count(*) as total"))
+            $Topics = Topic::where('type','cpliant')->where('dmm',$district)->where('status','like',$rectifed)->select("title", DB::raw("count(*) as total"))
             ->groupBy('title')
             ->get();
-            $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where('status','like',$rectifed)->select("title", DB::raw("count(*) as total"))
+            $Topics2 = Topic::where('type','cpliant')->where('dmm',$district)->where('status','like',$rectifed)->select("title", DB::raw("count(*) as total"))
             ->groupBy('title')
             ->get();
         }
@@ -473,7 +473,7 @@ class DashboardController extends Controller
         $Resolvedcpliant=0;
         $User = User::orderby('id','desc')->count();  
         $AUser = AppUser::orderby('id','desc')->count();  
-        $Announcement = Topic::where('type','=','news')->where('dee','=',$district)->get(); 
+        $Announcement = Topic::where('type','=','news')->where('dmm','=',$district)->get(); 
 
         if(auth()->user()->roles=='Admin') {
             if($district=='Tamil Nadu'){
@@ -485,12 +485,12 @@ class DashboardController extends Controller
                 $cpliant2 = Topic::where('type','=','cpliant')->where('status','like','Rectif%')->orderby('id','desc')->count(); 
     
             }else{
-                $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
-                $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
-                $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count(); 
-                $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                $cpliant = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
+                $Vrending = Topic::where('type','=','Vrending')->where('dmm','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+                $Vrendor = Topic::where('type','=','Vrendor')->where('dmm','=',$district)->orderby('id','desc')->count(); 
+                $cpliant1 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
                 
-                $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+                $cpliant2 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
 
 
             }
@@ -504,39 +504,39 @@ class DashboardController extends Controller
                 $cpliant2 = Topic::where('type','=','cpliant')->where('status','like','Rectif%')->orderby('id','desc')->count(); 
     
             }else{
-                $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
-                $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
-                $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count();  
-                $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                $cpliant = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
+                $Vrending = Topic::where('type','=','Vrending')->where('dmm','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+                $Vrendor = Topic::where('type','=','Vrendor')->where('dmm','=',$district)->orderby('id','desc')->count();  
+                $cpliant1 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
                 
-                $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+                $cpliant2 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
     
 
             }
         }elseif(auth()->user()->roles=='type1'){
-            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
-            $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
-            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $cpliant = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('dmm','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dmm','=',$district)->orderby('id','desc')->count(); 
             $User = User::where('location','=',$district)->orderby('id','desc')->count();  
        
-            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
             
-            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
-            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$district)->select(DB::raw('DATE(created_at) as date'))
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dmm','=',$district)->select(DB::raw('DATE(created_at) as date'))
             ->groupBy('date')
             ->get();
         }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
-            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
-            $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
-            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $cpliant = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('dmm','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dmm','=',$district)->orderby('id','desc')->count(); 
             $User = User::where('location','=',$district)->orderby('id','desc')->count();  
 
             $rectifed='Rectif:'.auth()->user()->id; 
         
-            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->orderby('id','desc')->count(); 
          
-            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like',$rectifed)->orderby('id','desc')->count(); 
-            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$district)->select(DB::raw('DATE(created_at) as date'))
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dmm','=',$district)->where('status','like',$rectifed)->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dmm','=',$district)->select(DB::raw('DATE(created_at) as date'))
             ->groupBy('date')
             ->get();
         }
@@ -623,7 +623,7 @@ class DashboardController extends Controller
         ->groupBy('title_tn')
         ->get();
         }else{
-            $Topics  = Topic::where('type','cpliant')->where('dee',$district)->select("title_tn", DB::raw("count(*) as total"))
+            $Topics  = Topic::where('type','cpliant')->where('dmm',$district)->select("title_tn", DB::raw("count(*) as total"))
             ->groupBy('title_tn')
             ->get();
         }

@@ -1,1 +1,665 @@
-tessgwqqdqwewqew  qeqwe
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Topic;
+use App\Models\AppUser;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use File;
+class DashboardController extends Controller
+{
+   
+     
+    public function create()
+    {
+        return view('dashboard');
+    }
+    
+    public function viewDasboard()
+    {
+        $Vrending=0;
+        $Vrendor=0;
+        $cpliant = 0;
+        $cpliant1 = 0;
+        $cpliant2 = 0;
+        $Resolvedcpliant=0;
+        $daycpliant =0;
+        $User = User::orderby('id','desc')->count();  
+        $AUser = AppUser::orderby('id','desc')->count();  
+        $Announcement = Topic::where('type','=','news')->get(); 
+        $location = Auth::user()->location;
+		 
+        if(auth()->user()->roles=='Admin') {
+            $cpliant = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+            $cpliant2 = Topic::where('type','=','cpliant')->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->select(DB::raw('DATE(created_at) as date'))
+            ->groupBy('date')
+            ->get();
+        }if(auth()->user()->roles=='type0') {
+            $cpliant = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->orderby('id','desc')->count();  
+            $cpliant1 = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+            $cpliant2 = Topic::where('type','=','cpliant')->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->select(DB::raw('DATE(created_at) as date'))
+            ->groupBy('date')
+            ->get();
+        }elseif(auth()->user()->roles=='type1'){ 
+            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$location)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$location)->select(DB::raw('DATE(created_at) as date'))
+            ->groupBy('date')
+            ->get();
+         
+        
+        }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
+            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$location)->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$location)->orderby('id','desc')->count(); 
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$location)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$location)->select(DB::raw('DATE(created_at) as date'))
+            ->groupBy('date')
+            ->get();
+        }
+        // $Topic = Topic::where('type','=',' broken')->where('dee','=',auth()->user()->location)->where('status','like','%'.auth()->user()->id)->where(function($query) {
+        //     $query->where('status','like','Assign%')
+        //     ->orWhere('status','like','Reques%');
+        //     })->orderby('id','desc')->get();
+      
+    
+		 
+			
+			  if($cpliant1!=0){
+				 $Resolvedcpliant = round((($cpliant2 / $cpliant1)*100), 2)  ;
+			 }else{
+				  $Resolvedcpliant = 0; //round(((count($daycpliant)/ $cpliant2 ) ), 2);	
+			 } 
+			 if($cpliant2!=0){
+				 $Avgcpliant = round(((count($daycpliant)/ $cpliant2 ) ), 2);	 
+			 }else{
+				  $Avgcpliant = 0; //round(((count($daycpliant)/ $cpliant2 ) ), 2);	
+			 }  
+		 
+		
+	 
+			
+		 
+       
+       
+        // echo $AUser; die;
+        $ddata = [
+            "Vrending" => $Vrending,
+            "User" => $User,
+            "AUser" => $AUser,
+            "Vrendor" => $Vrendor,  
+            "Announcement" => $Announcement, 
+            "cpliant" => $cpliant  ,
+            "Rcpliant" => $Resolvedcpliant .'%', 
+            "Avgcpliant" => $Avgcpliant
+        ];
+        return view('dashboard',['Counts'=> $ddata,'Announcement'=> $Announcement,'location'=>  $location]  );
+        
+    
+    }
+    public function chartMulti($district = null){
+        
+ 
+
+        $Topics=[];
+                
+        if(auth()->user()->roles=='Admin'   ) {
+            $Topics=[];
+            $Topics2=[];
+            if($district==null || $district=='Tamil Nadu') {
+                $Topics = Topic::where('type','Vrendor')->where('status','Active')->select("capacity", DB::raw("count(*) as total"))
+                ->groupBy('capacity')
+                ->get();
+                $Topics2 = Topic::where('type',' broken')->where('status','Active')->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get(); 
+            }else{
+                $Topics = Topic::where('type','Vrendor')->where('status','Active')->where('dee',$district)->select("capacity", DB::raw("count(*) as total"))
+                ->groupBy('capacity')
+                ->get();
+                $Topics2 = Topic::where('type',' broken')->where('status','Active')->where('dee',$district)->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get(); 
+
+            }
+            $lname=[];
+            $lname1=[];
+            $register=[];
+            $actiontaken=[];
+            $i=0;
+            //$Topics3=[];
+
+            foreach($Topics AS $rs){
+            $lname[$i]=str_replace("PRODUCT","",$rs['capacity']);;
+            $register[$i]=$rs['total'];
+            $i=$i+1;
+            }
+           
+
+
+            // return response()->json($ddata , 200);
+
+            // $lname= ['location-1','location-2','location-3','location-4','location-5','location-6','location-7'];
+            // $register=[ '5','20','15','10','5','30','22'];
+            // $actiontaken=[ '10','25','20','15','50','10','20'];
+            $ddata = [
+            "register" => $register,
+            "lname" => $lname,
+            "actiontaken" => $actiontaken,
+
+            ];
+            return response()->json($ddata, 200); 
+        }if(auth()->user()->roles=='type0') {
+            $Topics=[];
+                    $Topics2=[];
+                    $Topics = Topic::where('type','Vrendor')->where('status','Active')->select("capacity", DB::raw("count(*) as total"))
+                    ->groupBy('capacity')
+                    ->get();
+                    $Topics2 = Topic::where('type',' broken')->where('status','Active')->select("title", DB::raw("count(*) as total"))
+                    ->groupBy('title')
+                    ->get(); 
+
+                    $lname=[];
+                    $lname1=[];
+                    $register=[];
+                    $actiontaken=[];
+                    $i=0;
+                    //$Topics3=[];
+
+                    foreach($Topics AS $rs){
+                    $lname[$i]=$rs['title'];
+                    $register[$i]=$rs['total'];
+                    $i=$i+1;
+                    }
+                     
+
+              
+
+                    // $lname= ['location-1','location-2','location-3','location-4','location-5','location-6','location-7'];
+                    // $register=[ '5','20','15','10','5','30','22'];
+                    // $actiontaken=[ '10','25','20','15','50','10','20'];
+                    $ddata = [
+                    "register" => $register,
+                    "lname" => $lname,
+                    "actiontaken" => $actiontaken,
+
+                    ];
+                    return response()->json($ddata, 200);  
+        }elseif(auth()->user()->roles=='type1'){
+            // $Topics = Topic::where('type','Vrending')->where('status','Active')->where('title','=',auth()->user()->location)->select("title", DB::raw("count(*) as total"))
+            // ->groupBy('title')
+            // ->get();
+
+            $Topics=[];
+            $Topics2=[];
+            $Topics = Topic::where('type','Vrendor')->where('status','like','Active%')->where('dee','LIKE',"%".$district."%")->select("capacity", DB::raw("count(*) as total"))
+            ->groupBy('capacity')
+            ->get();
+            $Topics2 = Topic::where('type',' broken')->where('status','like','Active%')->where('dee','=',$district)->select("title", DB::raw("count(*) as total"))
+            ->groupBy('title')
+            ->get(); 
+
+            $lname=[];
+            $lname1=[];
+            $register=[];
+            $actiontaken=[];
+            $i=0;
+            //$Topics3=[];
+
+            foreach($Topics AS $rs){
+            $lname[$i]=str_replace("PRODUCT","",$rs['capacity']);;
+            $register[$i]=$rs['total'];
+            $i=$i+1;
+            }
+             
+           
+
+
+            // return response()->json($ddata , 200);
+
+            // $lname= ['location-1','location-2','location-3','location-4','location-5','location-6','location-7'];
+            // $register=[ '5','20','15','10','5','30','22'];
+            // $actiontaken=[ '10','25','20','15','50','10','20'];
+            $ddata = [
+            "register" => $register,
+            "lname" => $lname,
+            "actiontaken" => $actiontaken,
+
+            ];
+            return response()->json($ddata, 200); 
+        }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
+
+            
+ 
+            $Active='Active:'.auth()->user()->id;
+            $Topics=[];
+            $Topics2=[];
+            $Topics = Topic::where('type','Vrendor')->where('status','=',$Active)->where('dee',$district)->select("capacity", DB::raw("count(*) as total"))
+            ->groupBy('capacity')
+            ->get();
+            $Topics2 = Topic::where('type',' broken')->where('status','=',$Active)->select("title", DB::raw("count(*) as total"))
+            ->groupBy('title')
+            ->get(); 
+
+            $lname=[];
+            $lname1=[];
+            $register=[];
+            $actiontaken=[];
+            $i=0;
+            //$Topics3=[];
+
+            foreach($Topics AS $rs){
+                $lname[$i]=str_replace("PRODUCT","",$rs['capacity']);;
+                $register[$i]=$rs['total'];
+                $i=$i+1;
+            }
+            
+
+            // $lname= ['location-1','location-2','location-3','location-4','location-5','location-6','location-7'];
+            // $register=[ '5','20','15','10','5','30','22'];
+            // $actiontaken=[ '10','25','20','15','50','10','20'];
+            $ddata = [
+            "register" => $register,
+            "lname" => $lname,
+            "actiontaken" => $actiontaken,
+
+            ];
+            return response()->json($ddata, 200); 
+        }
+                        
+
+ }
+    
+    public function chartCampaign(){
+
+    
+        $Topics = Topic::where('type','event')->select("title", DB::raw("count(*) as total"))
+        ->groupBy('title')
+        ->get();
+       
+        $ln=[];
+        $da=[];
+        $i=0;
+      
+        foreach($Topics as $rs){
+           
+            $da[$i] = $rs['total']; 
+            $ln[$i] = $rs['title'];
+            $i=$i+1;
+        }
+        
+        $lname =  ['Campaign-1','Campaign-2','Campaign-3'];
+        $data =   [ '5','20','15'];
+        $ddata = [
+            "data" => $data,
+            "lname" => $lname,
+        ];
+        return response()->json($ddata, 200);
+    }
+    public function chartVLregistration(){
+        
+        $Topics=[];
+        if(auth()->user()->roles=='Admin'  ) {
+            $Topics = Topic::where('type','=','Vrendor')->select("location", DB::raw("count(*) as total"))->groupBy('location')->get();         
+        }elseif(auth()->user()->roles=='type0'){
+            $Topics =  Topic::where('type','=','Vrendor')->select("location", DB::raw("count(*) as total"))->groupBy('location')->get();
+        }elseif(auth()->user()->roles=='type1'){
+            $Topics =  Topic::where('type','=','Vrendor')->where('location','=',auth()->user()->location)->select("location", DB::raw("count(*) as total"))->groupBy('location')->get();
+        }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){   
+            $Active='Active:'.auth()->user()->id;   
+            $Topics = Topic::where('type','=','Vrendor')->where('status','=',$Active)->select("location", DB::raw("count(*) as total"))
+            ->groupBy('location')->get();
+        }
+    //    print_r($Topics);die;
+        
+        $lname=[];
+        $data=[];
+        $i=0;
+        foreach($Topics AS $rs){
+                $lname[$i]=$rs['location'];
+                $data[$i]=$rs['total'];
+                $i=$i+1;     
+           
+        }
+        //print_r($lname);die;
+        //$lname= ['Location 1', 'Location 2', 'Location 3', 'Location 4', 'Location 5', 'Location 6','Location 7'];
+        // $data=['15', '20', '25', '60','20', '15', '55'];
+        $ddata = [
+            "data" => $data,
+            "lname" => $lname,
+     
+        ];
+        return response()->json($ddata, 200);
+    }
+
+    public function chartActiontaken($district = null){
+        $Topics2 =[];
+        $Topics=[];
+        if(auth()->user()->roles=='Admin'  ) {
+            if($district == null || $district=='Tamil Nadu'){
+                $Topics = Topic::where('type','cpliant')->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get();
+                $Topics2 = Topic::where('type','cpliant')->where(function($query) {$query->where('status', 'like', 'Reject%')->orWhere('status', 'like', 'Rectif%');}
+                )->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get(); 
+            }else{
+                $Topics = Topic::where('type','cpliant')->where('dee',$district)->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get();
+                $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where(function($query) {$query->where('status', 'like', 'Reject%')->orWhere('status', 'like', 'Rectif%');}
+                )->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get(); 
+            }
+      
+        }if(auth()->user()->roles=='type0') {
+            if($district == null || $district=='Tamil Nadu'){
+                $Topics = Topic::where('type','cpliant')->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get();
+                $Topics2 = Topic::where('type','cpliant')->where('status','Rectified')->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get(); 
+            }else{
+                $Topics = Topic::where('type','cpliant')->where('dee',$district)->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get();
+                $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where('status','Rectified')->select("title", DB::raw("count(*) as total"))
+                ->groupBy('title')
+                ->get(); 
+            }
+          
+        }elseif(auth()->user()->roles=='type1'){
+            $Topics = Topic::where('type','cpliant')->where('dee',$district)->where('title','=',auth()->user()->location)->select("title", DB::raw("count(*) as total"))
+            ->groupBy('title')
+            ->get();
+            $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where('title','=',auth()->user()->location)->where('status','like','Rectif:%')->select("title", DB::raw("count(*) as total"))
+            ->groupBy('title')
+            ->get();
+        }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
+            $rectifed='Rectif:'.auth()->user()->id; 
+            $Topics = Topic::where('type','cpliant')->where('dee',$district)->where('status','like',$rectifed)->select("title", DB::raw("count(*) as total"))
+            ->groupBy('title')
+            ->get();
+            $Topics2 = Topic::where('type','cpliant')->where('dee',$district)->where('status','like',$rectifed)->select("title", DB::raw("count(*) as total"))
+            ->groupBy('title')
+            ->get();
+        }
+       
+        $lname=[];
+        $lname1=[];
+        $register=[];
+        $actiontaken=[];
+        $i=0;
+        //$Topics3=[];
+
+        foreach($Topics AS $rs){
+        $lname1[$i]=$rs['title'];
+        $i=$i+1;
+        }
+        foreach($Topics2 AS $rs){
+        $lname1[$i]=$rs['title'];
+        $i=$i+1;
+        }
+
+        $i=0;
+        $lname1=array_unique($lname1);
+        foreach($lname1 as $LR){
+        // echo $LR . " ";
+        $lname[$i]=$LR;
+        $register[$i]=0;
+        $actiontaken[$i]=0;
+        foreach($Topics2 AS $rs1){
+
+        if($LR==$rs1['title']){
+            $actiontaken[$i]=$rs1['total'];
+            
+        }
+        }
+        foreach($Topics AS $rs){
+
+        if($LR==$rs['title']){
+            $register[$i]=$rs['total'];
+            
+        }
+        }
+        $i=$i+1;
+        }
+        //print_r($actiontaken);die;
+
+
+
+        // return response()->json($ddata , 200);
+
+        // $lname= ['location-1','location-2','location-3','location-4','location-5','location-6','location-7'];
+        // $register=[ '5','20','15','10','5','30','22'];
+        // $actiontaken=[ '10','25','20','15','50','10','20'];
+        $ddata = [
+        "register" => $register,
+        "lname" => $lname,
+        "actiontaken" => $actiontaken,
+
+        ];
+        return response()->json($ddata, 200); 
+    }
+    public function dashboardDistrict($district){
+
+
+        $Vrending=0;
+        $Vrendor=0;
+        $cpliant = 0;
+        $cpliant1 = 0;
+        $cpliant2 = 0;
+        $Resolvedcpliant=0;
+        $User = User::orderby('id','desc')->count();  
+        $AUser = AppUser::orderby('id','desc')->count();  
+        $Announcement = Topic::where('type','=','news')->where('dee','=',$district)->get(); 
+
+        if(auth()->user()->roles=='Admin') {
+            if($district=='Tamil Nadu'){
+                $cpliant = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+                $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->orderby('id','desc')->count(); 
+                $Vrendor = Topic::where('type','=','Vrendor')->orderby('id','desc')->count(); 
+                $cpliant1 = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+                
+                $cpliant2 = Topic::where('type','=','cpliant')->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+    
+            }else{
+                $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+                $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                
+                $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+
+
+            }
+        }if(auth()->user()->roles=='type0') {
+            if($district=='Tamil Nadu'){
+                $cpliant = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+                $Vrending = Topic::where('type','=','Vrending')->where('status','=','Active')->orderby('id','desc')->count(); 
+                $Vrendor = Topic::where('type','=','Vrendor')->orderby('id','desc')->count(); 
+                $cpliant1 = Topic::where('type','=','cpliant')->orderby('id','desc')->count(); 
+                
+                $cpliant2 = Topic::where('type','=','cpliant')->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+    
+            }else{
+                $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+                $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count();  
+                $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+                
+                $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+    
+
+            }
+        }elseif(auth()->user()->roles=='type1'){
+            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $User = User::where('location','=',$district)->orderby('id','desc')->count();  
+       
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like','Rectif%')->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$district)->select(DB::raw('DATE(created_at) as date'))
+            ->groupBy('date')
+            ->get();
+        }elseif(auth()->user()->roles=='type2' || auth()->user()->roles=='type3'){
+            $cpliant = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $Vrending = Topic::where('type','=','Vrending')->where('dee','=',$district)->where('status','=','Active')->orderby('id','desc')->count(); 
+            $Vrendor = Topic::where('type','=','Vrendor')->where('dee','=',$district)->orderby('id','desc')->count(); 
+            $User = User::where('location','=',$district)->orderby('id','desc')->count();  
+
+            $rectifed='Rectif:'.auth()->user()->id; 
+        
+            $cpliant1 = Topic::where('type','=','cpliant')->where('dee','=',$district)->orderby('id','desc')->count(); 
+         
+            $cpliant2 = Topic::where('type','=','cpliant')->where('dee','=',$district)->where('status','like',$rectifed)->orderby('id','desc')->count(); 
+            $daycpliant = Topic::where('type','cpliant')->where('dee','=',$district)->select(DB::raw('DATE(created_at) as date'))
+            ->groupBy('date')
+            ->get();
+        }
+  
+        try {
+
+  
+ 
+            /* Write Your Code Here */
+            if($cpliant2 != null || $cpliant1 != null){
+                $Resolvedcpliant=round((($cpliant2 / $cpliant1)*100), 2)  ;
+            }
+           
+            
+          
+          } catch (Exception $e) {
+          
+            
+          
+            //  return $e->getMessage();
+          
+          }
+       
+        $Avgcpliant=$cpliant2;
+        $location = Auth::user()->location;
+        // echo $AUser; die;
+        $ddata = [
+            "Vrending" => $Vrending,
+            "User" => $User,
+            "AUser" => $AUser,
+            "Vrendor" => $Vrendor,  
+            "Announcement" => $Announcement, 
+            "cpliant" => $cpliant  ,
+            "Rcpliant" => $Resolvedcpliant . '%', 
+            "Avgcpliant" => $Avgcpliant,
+        ];
+        return response()->json($ddata, 200); 
+       //// return view('dashboard',['Counts'=> $ddata,'Announcement'=> $Announcement,'location'=>  $location]  );
+      
+       
+        
+    }
+
+    public function chartSingledodd(){
+
+        $Topics  = Topic::where('type','cpliant')->select("status", DB::raw("count(*) as total"))
+       ->groupBy('status')
+       ->get();
+    
+      
+       $ln=[];
+       $da=[];
+       $da1=[];
+       $i=0;
+       $k=0;
+       foreach($Topics as $rs){
+          if($rs['status']!='Active'){
+           //$da[$i] = $rs['total']; 
+           
+           $k=$k+1;
+           $da[0]=$k;
+          }
+          
+           $i=$i+1;
+           $da1[0]=$i;
+       }
+       $ln[0] = 'Action Taken';
+       $ln[1] = 'Case Register';
+
+       $lname= $ln;
+       $register=$da1;
+       $actiontaken=$da;
+       $ddata = [
+           "register" => $register,
+           "lname" => $lname,
+           "actiontaken" => $actiontaken,
+            
+       ];
+       return response()->json($ddata, 200);
+   }
+    public function dhautpieChart($district = null){
+        if($district == null || $district=='Tamil Nadu'){
+         $Topics  = Topic::where('type','cpliant')->select("title_tn", DB::raw("count(*) as total"))
+        ->groupBy('title_tn')
+        ->get();
+        }else{
+            $Topics  = Topic::where('type','cpliant')->where('dee',$district)->select("title_tn", DB::raw("count(*) as total"))
+            ->groupBy('title_tn')
+            ->get();
+        }
+     
+       
+        $ln=[];
+        $da=[];
+        $da1=[];
+        $i=0;
+        $k=0;
+        foreach($Topics as $rs){
+         
+            
+            if($k<5){
+                    $da[$k]=$rs['title_tn'];
+                
+                
+                    $i=$i+1;
+                    $da1[$k]=$rs['total'];
+                    $k=$k+1;
+             }
+        }
+        $ln[0] = 'cpliant ';
+        $ln[1] = 'Case Register';
+
+        $lname= $ln;
+        $register=$da1;
+        $actiontaken=$da;
+        $ddata = [
+            "register" => $register,
+            "lname" => $lname,
+            "actiontaken" => $actiontaken,
+             
+        ];
+        return response()->json($ddata, 200);
+    }
+    
+}
+

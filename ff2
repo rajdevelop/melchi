@@ -1,0 +1,806 @@
+@extends('layouts.user_type.auth')
+
+	@section('content')
+@php
+$loc=$location;
+$locval='0';
+@endphp
+    <script src="https://www.amcharts.com/lib/4/core.js"></script>
+  	<script src="https://www.amcharts.com/lib/4/maps.js"></script>
+	<script src="assets/js/dmmm.js"></script>
+	<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="assets/js/chartjs-plugin-labels.js"></script>
+	
+	<div class="row">
+		<div class="row col-md-4">
+			<div class="col-md-5 p-1 me-2 ms-3">
+				<div class="card" style="height:120px;background-color:#F0F4C3;">  
+					<div class="card-body p-3 d-flex align-items-center">
+						<div class="numbers text-center">
+							<p class="text-sm mb-0 text-capitalize font-weight-bold"> title  </p>
+							<h4 class="font-weight-bolder mb-0">
+							
+							<span class="text-dark text-lg font-weight-bolder" id="rendingcnt" >{{$Counts['rending']}}</span>
+							 
+							</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-5 p-1 ms-2 me-3">
+				<div class="card" style="height:120px;background-color:#B9F6CA;">
+					<div class="card-body p-3 d-flex align-items-center justify-content-center">
+						<div class="numbers text-center">
+							<!-- <p class="text-sm mb-0 text-capitalize font-weight-bold">Total No of App User </p> -->
+							<i class="fa fa-mobile font-weight-bolder" style="font-size:2.5rem;"></i>
+							<p class="text-sm mb-0 text-capitalize font-weight-bold">App User </p>
+							<h4 class="font-weight-bolder mb-0">
+								
+								<span class="text-dark text-lg font-weight-bolder" id="ausercnt">{{$Counts['AUser']}}</span>
+							</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-12 p-1">
+				<div class="card">
+					<div class="card-body p-3">
+						<select id="districtDrop" class="form-control">
+							@if(auth()->user()->roles=='type1' )
+							    $loc=trim($location);
+								 
+								@if($loc=='Pudhur')
+								$locval='18';
+								@endif
+								@if($loc=='Pudhur')
+								$locval='18';
+								@endif
+								@if($loc=='Pudhur')
+								$locval='18';
+								@endif
+								@if($loc=='Pudhur')
+								$locval='18';
+								
+								@endif
+								
+								<!-- <option value="{{$locval}}" selected>{{$loc}}</option> -->
+								
+							@else
+								$loc='';
+								<option value="">state name</option>
+								
+							@endif
+							
+						</select>
+					</div>
+					<div class="card-header pb-0 text-center pt-0">
+						<!-- <h6>Filled Tamilnadu map based on the value as per the three selections - rending Machine, rendors, issues</h6> -->
+						<small>Select JYY SHOP to see the count</small> 
+					</div>
+					<div class="card-body p-3">
+						<div id="chartdiv" style=" width: 100%;height: 500px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row col-md-4">
+			<!-- <div class="col-md-5 p-1">
+				<div class="card" style="height:120px;background-color:#FBE9E7;">
+					<div class="card-body p-3 d-flex align-items-center">
+						<div class="numbers text-center">
+							<p class="text-sm mb-0 text-capitalize font-weight-bold">rendor's Registered</p>
+							<h4 class="font-weight-bolder mb-0">
+							
+							<span class="text-dark text-sm font-weight-bolder" id="rendorcnt">{{$Counts['rendor']}} </span>
+							</h4>
+						</div>
+					</div>
+				</div>
+			</div> -->
+			<!-- <div class="col-md-5 p-1">
+				<div class="card" style="height:120px;background-color:#FFCCBC;">
+					<div class="card-body p-3 d-flex align-items-center">
+						<div class="numbers text-center">
+							<p class="text-sm mb-0 text-capitalize font-weight-bold"> Total issues </p>
+							<h3 class="font-weight-bolder mb-0">
+							 
+								<span class="text-dark text-sm font-weight-bolder" id="issuecnt"> {{$Counts['issue']}}</span>
+							</h3>
+						</div>
+					</div>
+				</div>
+			</div> -->
+			<div class="col-md-12 p-1">
+				<div class="card">
+					<div class="ribbon-1">&nbsp;&nbsp;&nbsp;&nbsp;Top <span style="font-size:16px;font-weight:bold;">&nbsp;&nbsp;5 </span></div>
+					<div class="card-header pb-0 pt-0 text-center">
+					 	<h6 class="mb-0">issue</h6>
+					</div>
+					<div class="ribbon-3">Total <span id="issuecnt" style="font-size:16px;font-weight:bold;">&nbsp;&nbsp;{{$Counts['issue']}} </span>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+					  <div class="card-body p-3 position-relative">
+						<div class="chart-center">Categories</div>
+						<div class="chart">
+							<canvas id="doughnut-chart" class="chart-canvas" height="250px"></canvas>
+						</div>
+					</div> 
+					 
+				</div>
+			</div>
+			<div class="col-md-12 p-1 pt-2">
+				<div class="card">
+					<div class="ribbon-5">&nbsp;&nbsp;&nbsp;&nbsp;fixed <span id="Rissue" style="font-size:16px;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;{{$Counts['issue']}} </span></div>
+					<div class="card-header pb-1 pt-1 text-center">
+						<h6 class="mb-0">Filed vs fixed</h6>
+					</div>
+					<div class="ribbon-2">Average <span id="Avgissue" style="font-size:16px;font-weight:bold;">&nbsp;&nbsp;{{$Counts['Avgissue']}} </span><span class="text-info text-sm font-weight-bolder">days</span>&nbsp;&nbsp;&nbsp;&nbsp;</div>
+					<div class="card-body p-3">
+						<div class="chart">
+							<canvas id="bar-chart-horizontal2" class="chart-canvas" height="300px"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>		
+		<div class="row col-md-4">
+			<!-- <div class="col-md-5 p-1">
+				<div class="card" style="height:120px;background-color:#F0F4C3;">  
+					<div class="card-body p-3 d-flex align-items-center">
+						<div class="numbers text-center">
+							<p class="text-sm mb-0 text-capitalize font-weight-bold"> issues fixed %</p>
+							<h4 class="font-weight-bolder mb-0">
+							
+							<span class="text-dark text-lg font-weight-bolder" id="Rissue">{{$Counts['Rissue']}} </span>
+							</h4>
+						</div>
+					</div>
+				</div>
+			</div> -->
+			<!-- <div class="col-md-5 p-1">
+				<div class="card" style="height:120px;background-color:#FBE9E7;">
+					<div class="card-body p-3 d-flex align-items-center">
+						<div class="numbers text-center">
+							<p class="text-sm mb-0 text-capitalize font-weight-bold">Average resolving issue</p>
+							<h4 class="font-weight-bolder mb-0">
+							
+							<span class="text-dark text-lg font-weight-bolder" id="Avgissue"> {{$Counts['Avgissue']}} </span> <span class="text-info text-sm font-weight-bolder">days</span>
+							</h4> 
+						</div>
+					</div>
+				</div>
+			</div> -->
+			<div class="col-md-12 pt-2">
+				<div class="card">
+					<div class="ribbon-4">&nbsp;&nbsp;&nbsp;&nbsp;rendors <span id="rendorcnt" style="font-size:16px;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;{{$Counts['rendor']}} </span></div>
+					<div class="card-header pb-0 pt-0 text-center">
+						<h6>Categories</h6>
+					</div>
+					<div class="card-body p-3">
+						<div class="chart ">
+						<canvas id="mixed-chart" class="chart-canvas" height="700px"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- -->
+	</div>
+	<script>
+		
+		var userURL = 'https://n/admin/';
+		var locdist =  '{{$loc}}';
+		var distval = '{{$locval}}';
+		 
+		//alert(locdist);
+				document.addEventListener('DOMContentLoaded', function() {
+			mixchartdip('{{$loc}}');
+			dhautpiechart('{{$loc}}');
+			barhrchart('{{$loc}}');
+		});
+
+		
+
+		$.ajax({
+			dataType: "json",
+			url: "assets/geojson/Boundary.geojson",
+			success: function (data) {
+				var fetch = "";
+				map(0);
+				$(data.features).each(function (key, val) {
+					if(val.properties['JYY SHOP']==locdist){
+						//alert(val.properties['JYY SHOP']);
+						distval=val.properties.id;
+						map(distval);
+						fetch += '<option value="'+val.properties.id+'" selected >'+val.properties['JYY SHOP']+'</option>';
+					}else{
+						fetch += '<option value="'+val.properties.id+'">'+val.properties['JYY SHOP']+'</option>';
+					}
+					
+				});
+				$('#districtDrop').append(fetch);
+			}
+		});
+
+		var d = [];
+		
+		function map(dis){
+			console.log(dis)
+			// Themes begin
+			am4core.useTheme(am4themes_animated);
+			// Themes end
+			
+			// Create map instance
+			var chart = am4core.create("chartdiv", am4maps.MapChart);
+			
+			// Set map definition
+			chart.geodata = am4geodata_india2019High;
+			// Set projection
+			chart.projection = new am4maps.projections.Miller();
+			
+			// Create map polygon series
+			var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+		
+			//Set min/max fill color for each area
+			polygonSeries.heatRules.push({
+				property: "fill",
+				target: polygonSeries.mapPolygons.template,
+				min: chart.colors.getIndex(0).brighten(1),
+				min: chart.colors.getIndex(1).brighten(0.3),
+				// logarithmic: true
+				// "min": am4core.color("#ffd7b1"), 
+			});
+			// Make map load polygon data (state shapes and names) from GeoJSON
+			polygonSeries.useGeodata = true;
+
+			// Set heatmap values for each state
+			polygonSeries.data = [{
+				"id": dis,
+				"fill": am4core.color("#ff7d01")
+			}];
+			
+			// Configure series tooltip
+			var polygonTemplate = polygonSeries.mapPolygons.template;
+			polygonTemplate.tooltipText = "{JYY SHOP}";
+			polygonTemplate.nonScalingStroke = true;
+			polygonTemplate.strokeWidth = 0.5;
+			polygonTemplate.propertyFields.fill = "fill";
+			polygonTemplate.events.on("hit", function (event) {
+				chart.maxZoomLevel = 1;
+				polygonTemplate.properties.fill = am4core.color("#ff7d01");
+				var dist = event.target.dataItem.dataContext['id'];
+				 //alert(event.target.dataItem.dataContext['JYY SHOP']);
+				 var district=event.target.dataItem.dataContext['JYY SHOP'];
+				var userURL = 'https://abcdfr.coomn/admin/';
+				$.ajax({
+				url: userURL+'dashboard-district/'+district, 
+				type: 'GET',
+				dataType: 'json',
+				success: function(data) {
+				//	data1=data.data;
+				//	data2=data.list;
+				//	labels1=data.lname;
+					
+					$('#rendingcnt').html(data.rending);
+					$('#rendorcnt').html(data.rendor);
+					$('#ausercnt').html(data.AUser);
+					$('#issuecnt').html(data.issue);
+					$('#Rissue').html(data.Rissue);
+					$('#Avgissue').html(data.Avgissue);
+					mixchartdip(district);
+					dhautpiechart(district);
+					barhrchart(district);
+				 }
+			    });
+				
+				$('#districtDrop').val(dist);
+
+				map(dist);
+				 
+				
+			});
+			// Create hover state and set alternative fill color
+			var hs = polygonTemplate.states.create("hover");
+			hs.properties.fill = am4core.color("#ff7d01");
+			chart.maxZoomLevel = 1;
+			chart.seriesContainer.draggable = false;
+			chart.seriesContainer.resizable = false;
+		}
+		
+		let myChart;
+		let myDough;
+		let myLine;
+		function mixchartdip(district){
+			var data1=[];
+			var data2=[];
+			var labels1=[];
+			$.ajax({
+				url: userURL+'chartmulti/'+district,
+				type: 'GET',
+				dataType: 'json',
+				success: function(response) {
+					const ctx = document.getElementById('mixed-chart').getContext('2d');
+					// setup 
+					const data2 = {
+						labels: response.lname,
+						datasets: [
+							{
+								label: " ",
+								weight: 5,
+								borderWidth: 0,
+								borderRadius: 4,
+								backgroundColor: '#b3481b',
+								data:  response.register,
+								fill: false
+							}
+						]
+					};
+					// config 
+					const config = {
+						type: 'bar',
+						data: data2,
+						options: {
+							indexAxis: 'y',
+							responsive: true,
+							maintainAspectRatio: false,
+							plugins: {
+								legend: {
+								//position: 'bottom',
+								 display: false,
+								}
+							},
+							scales: {
+								y: {
+								grid: {
+									drawBorder: false,
+									display: true,
+									drawOnChartArea: true,
+									drawTicks: false,
+									borderDash: [5, 5]
+								},
+								ticks: {
+									display: true,
+									padding: 10,
+									color: '#9ca2b7'
+								}
+								},
+								x: {
+								grid: {
+									drawBorder: false,
+									display: false,
+									drawOnChartArea: true,
+									drawTicks: true,
+								},
+								ticks: {
+									display: true,
+									color: '#9ca2b7',
+									padding: 10
+								}
+								},
+							},
+						},
+					};
+					if ( myChart ) {
+					console.log(myChart)
+						myChart.destroy();
+						myChart = new Chart(ctx, config);
+					} else {
+					console.log(myChart)
+						myChart = new Chart(ctx, config)
+					}
+					/* var lnam = [];
+					lnam.push(data.lname);
+					var reg = [];
+					reg.push(data.register);
+
+					// Bar chart horizontal
+					var myChart;
+					var canvas = document.getElementById('mixed-chart');
+					myChart.data.labels = data.lname;
+					myChart.data.datasets[0].data = data.register;
+					myChart.update();
+					// Create the new chart
+					var ctx62 = canvas.getContext('2d');
+					myChart = new Chart(ctx62, {
+						type: "bar",
+						data: {
+							labels:  data.lname,					
+							datasets: [{
+								label: "VM",
+								weight: 5,
+								borderWidth: 0,
+								borderRadius: 4,
+								backgroundColor: '#71d8f5',
+								data:  data.register,
+								fill: false
+							},
+							{
+								label: "BC",
+								weight: 5,
+								borderWidth: 0,
+								borderRadius: 4,
+								backgroundColor: '#f74a4a',
+								data: data.actiontaken,
+								fill: false
+							}],
+						},
+						options: {
+							indexAxis: 'y',
+							responsive: true,
+							maintainAspectRatio: false,
+							plugins: {
+								legend: {
+								position: 'bottom',
+								//display: false,
+								}
+							},
+							scales: {
+								y: {
+								grid: {
+									drawBorder: false,
+									display: true,
+									drawOnChartArea: true,
+									drawTicks: false,
+									borderDash: [5, 5]
+								},
+								ticks: {
+									display: true,
+									padding: 10,
+									color: '#9ca2b7'
+								}
+								},
+								x: {
+								grid: {
+									drawBorder: false,
+									display: false,
+									drawOnChartArea: true,
+									drawTicks: true,
+								},
+								ticks: {
+									display: true,
+									color: '#9ca2b7',
+									padding: 10
+								}
+								},
+							},
+						},
+					}); */
+
+				}
+			});
+		}
+		function dhautpiechart(district){
+			var data1=[];
+			var data2=[];
+			var labels1=[];
+			$.ajax({
+				url: userURL+'dhautpiechart/'+district,
+				type: 'GET',
+				dataType: 'json',
+				success: function(data) {
+					labels1=data.actiontaken;
+					// Bar chart
+					var ctx5 = document.getElementById("doughnut-chart").getContext("2d");
+					const data2 = {
+						labels: labels1,
+						datasets: [
+							{
+								label: 'My First Dataset',
+								data: data.register,
+								backgroundColor: [
+								'rgb(255, 99, 132)',
+								'rgb(54, 162, 235)',
+								'rgb(255, 205, 86)',
+								'rgb(255, 100, 10)',
+								'rgb(255, 150, 130)'
+								],
+								hoverOffset: 2
+							}
+						]
+					};
+					// config 
+					const config = {
+						type: 'doughnut',
+						data: data2,
+						options: {
+							responsive: true,
+							maintainAspectRatio: false,
+							plugins: {
+								legend: {
+								//position: 'bottom',
+								display: false,
+								}
+							},
+							
+						},
+					};
+					
+					if ( myDough ) {
+						console.log(myDough)
+						myDough.destroy();
+						myDough = new Chart(ctx5, config);
+					} else {
+						console.log(myDough)
+						myDough = new Chart(ctx5, config)
+					}
+					/* new Chart(ctx5, {
+					type: "doughnut",
+					data: {
+						labels: labels1,
+						datasets: [{
+						label: 'My First Dataset',
+						data: data.register,
+						backgroundColor: [
+						'rgb(255, 99, 132)',
+						'rgb(54, 162, 235)',
+						'rgb(255, 205, 86)',
+						'rgb(255, 100, 10)',
+						'rgb(255, 150, 130)'
+						],
+						hoverOffset: 2
+					}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						legend: {
+							display: true,
+						},
+					},
+					plugins: {
+						labels: {
+							render: 'label'
+						}
+					}
+					}); */
+				}
+			});
+
+		}
+		function barhrchart(district){
+			var data1=[];
+			var data2=[];
+			var labels1=[];
+			$.ajax({
+				url: userURL+'chartactiontaken/'+district,
+				type: 'GET',
+				dataType: 'json',
+				success: function(data) {
+					/* data1=data.data;
+					data2=data.list;
+					labels1=data.lname; */
+								
+					// Mixed chart
+					var ctx7 = document.getElementById("bar-chart-horizontal2").getContext("2d");
+					var gradientStroke1 = ctx7.createLinearGradient(20, 20, 200, 100);
+					/* new Chart(ctx7, {
+						data: {
+						labels: data.lname,
+						datasets: [
+							{
+							type: "line",
+							label: "Action Taken",
+							tension: 0,
+							borderWidth: 0,
+							pointRadius: 4,
+							pointBackgroundColor: "#f0b907",
+							borderColor: "#159e00",
+							borderWidth: 3,
+							backgroundColor: gradientStroke1,
+							data: data.actiontaken,
+							fill: true,
+							fillBetweenSet: 2,
+							fillBetweenColor: '#159e00',
+							},
+					
+							{
+							type: "bar",
+							label: "Case Register",
+							weight: 5,
+							tension: 0.4,
+							borderWidth: 0,
+							pointBackgroundColor: "#43ccd9",
+							borderColor: "#43ccd9",
+							backgroundColor: '#f56ebd',
+							borderRadius: 4,
+							borderSkipped: false,
+							data: data.register,
+							maxBarThickness: 40,
+							} 
+						],
+						},
+						options: {
+						indexAxis: 'y',
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+							position: 'bottom',
+							display: true,
+							}
+						},
+						interaction: {
+							intersect: false,
+							mode: 'index',
+						},
+						scales: {
+							y: {
+							grid: {
+								drawBorder: false,
+								display: false,
+								drawOnChartArea: true,
+								drawTicks: false,
+								borderDash: [5, 5]
+							},
+							ticks: {
+								display: true,
+								padding: 10,
+								color: '#b2b9bf',
+								font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+								},
+							}
+							},
+							x: {
+							grid: {
+								drawBorder: false,
+								display: false,
+								drawOnChartArea: true,
+								drawTicks: true,
+								borderDash: [5, 5]
+							},
+							ticks: {
+								display: true,
+								color: '#b2b9bf',
+								padding: 10,
+								font: {
+								size: 11,
+								family: "Open Sans",
+								style: 'normal',
+								lineHeight: 2
+								},
+							}
+							},
+						},
+						},
+					}); */
+
+					const data2 = {
+						labels: data.lname,
+						datasets: [
+							{
+								type: "line",
+								label: "Action Taken",
+								tension: 0,
+								borderWidth: 0,
+								pointRadius: 4,
+								pointBackgroundColor: "#f0b907",
+								borderColor: "#159e00",
+								borderWidth: 3,
+								backgroundColor: gradientStroke1,
+								data: data.actiontaken,
+								fill: true,
+								fillBetweenSet: 2,
+								fillBetweenColor: '#159e00',
+							},
+							{
+								type: "bar",
+								label: "Case Register",
+								weight: 5,
+								tension: 0.4,
+								borderWidth: 0,
+								pointBackgroundColor: "#43ccd9",
+								borderColor: "#43ccd9",
+								backgroundColor: '#f56ebd',
+								borderRadius: 4,
+								borderSkipped: false,
+								data: data.register,
+								maxBarThickness: 40,
+							}
+						]
+					};
+					// config 
+					const config = {
+						data: data2,
+						options: {
+							indexAxis: 'y',
+							responsive: true,
+							maintainAspectRatio: false,
+							plugins: {
+								legend: {
+								position: 'bottom',
+								display: true,
+								}
+							},
+							interaction: {
+								intersect: false,
+								mode: 'index',
+							},
+							scales: {
+								y: {
+									grid: {
+										drawBorder: false,
+										display: false,
+										drawOnChartArea: true,
+										drawTicks: false,
+										borderDash: [5, 5]
+									},
+									ticks: {
+										display: true,
+										padding: 10,
+										color: '#b2b9bf',
+										font: {
+										size: 11,
+										family: "Open Sans",
+										style: 'normal',
+										lineHeight: 2
+										},
+									}
+								},
+								x: {
+									grid: {
+										drawBorder: false,
+										display: false,
+										drawOnChartArea: true,
+										drawTicks: true,
+										borderDash: [5, 5]
+									},
+									ticks: {
+										display: true,
+										color: '#b2b9bf',
+										padding: 10,
+										font: {
+										size: 11,
+										family: "Open Sans",
+										style: 'normal',
+										lineHeight: 2
+										},
+									}
+								},
+							},
+						},
+					};
+					
+					if ( myLine ) {
+						console.log(myLine)
+						myLine.destroy();
+						myLine = new Chart(ctx7, config);
+					} else {
+						console.log(myLine)
+						myLine = new Chart(ctx7, config)
+					}
+				}
+			});
+		}
+		$('#districtDrop').on('change', function(){
+			var dis = $(this).val();
+			map(dis);
+			var txt = $( "#districtDrop option:selected" ).text();
+			mixchartdip(txt);
+			dhautpiechart(txt);
+			barhrchart(txt);
+			$.ajax({
+				url: userURL+'dashboard-district/'+txt, 
+				type: 'GET',
+				dataType: 'json',
+				success: function(data) {
+				//	data1=data.data;
+				//	data2=data.list;
+				//	labels1=data.lname;
+					
+					$('#rendingcnt').html(data.rending);
+					$('#rendorcnt').html(data.rendor);
+					$('#ausercnt').html(data.AUser);
+					$('#issuecnt').html(data.issue);
+					$('#Rissue').html(data.Rissue);
+					$('#Avgissue').html(data.Avgissue);
+				}
+			});
+		})
+	</script>
+	
+@endsection
+@push('dashboard')
+@endpush
